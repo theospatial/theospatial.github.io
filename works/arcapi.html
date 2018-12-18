@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>ArcGIS DevLabs: Create a JavaScript starter app</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.8/esri/css/main.css">
+<script src="https://js.arcgis.com/4.8/"></script>
+    <style>
+      html, body, #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+    </style>
+    <script>
+  var illuminance;
+  window.addEventListener('devicelight', function(event) {
+    illuminance: event.value;
+    console.log(illuminance + "=" + event.value);
+  })
+    
+  if (illuminance == null){
+    illuminance = 10;
+  }
+    
+  require([
+    "esri/Map",
+    "esri/views/MapView",
+    //locate module
+	  "esri/widgets/Locate",
+	  //tracking module
+	  "esri/widgets/Track",
+	  //include Graphic
+	  "esri/Graphic",      
+    "dojo/domReady!"
+    ], function(Map, MapView, Locate, Track, Graphic) {
+    
+    var g_size = (Math.log(illuminance)+1)*10;
+	  var map = new Map({
+      basemap: "streets-night-vector"
+    });
+	  
+      //44.0455112,-123.0806264
+      var view = new MapView({
+        container: "viewDiv",
+        map: map,
+        center: [-123.0806264, 44.0455112],
+        zoom: 14
+      });
+      
+	  var locate = new Locate({
+      view: view,
+      useHeadingEnabled: false,
+      goToOverride: function(view, options) {
+        options.target.scale = 1500;
+        return view.goTo(options.target);
+      }
+    });
+    view.ui.add(locate, "top-right")
+      
+	  var track = new Track({
+      view: view,
+	  	graphic: new Graphic({
+		    symbol: {
+		  	  type: "simple-marker",
+		  	  size: String(g_size)+"px",
+		  	  color: "cyan",
+		  	  outline: {
+		  	    color: "#003355",
+		  	    width: "2px"
+		  	  }
+        }
+		  }),
+		  useHeadingEnabled: true,
+		  goToLocationEnabled: true,
+      goToOverride: function(view, options) {
+        options.target.scale = null;
+        return view.goTo(options.target);
+      }
+    });
+    view.ui.add(track, "top-right");
+  });
+</script>
+
+  </head>
+  <body>
+    <div id="viewDiv"></div>
+  </body>
+</html>
